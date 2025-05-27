@@ -5,9 +5,9 @@ const fs = require("fs");
 const multer = require("multer");
 require("dotenv").config();
 
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const app = express();
+
 const uploadFolder = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
 
@@ -23,8 +23,7 @@ app.use("/uploads", express.static(uploadFolder));
 
 app.post("/upload", upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const imageUrl = `/uploads/${req.file.filename}`;
-  res.json({ imageUrl });
+  res.json({ imageUrl: `/uploads/${req.file.filename}` });
 });
 
 app.post("/api/ghibli-style", async (req, res) => {
@@ -32,13 +31,7 @@ app.post("/api/ghibli-style", async (req, res) => {
     const { image_url } = req.body;
     if (!image_url) return res.status(400).json({ error: "Image URL is required" });
 
-    let fullImageUrl = image_url;
-    if (image_url.startsWith("/")) {
-      const host = req.get("host");
-      const protocol = req.protocol;
-      fullImageUrl = `${protocol}://${host}${image_url}`;
-    }
-
+    const fullImageUrl = image_url.startsWith("http") ? image_url : `${req.protocol}://${req.get("host")}${image_url}`;
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
@@ -46,11 +39,8 @@ app.post("/api/ghibli-style", async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "7be575a9c8b24e419a6e6d3303c189532653b6a61c7d7b7a87edb5d80000a14e",
-        input: {
-          image: fullImageUrl,
-          prompt: "ghibli style"
-        },
+        version: "db21e45d3d8662f2bf2ad4f2e24dbb0e44e90207a55ed9b058bb69e2c9ab0e55",
+        input: { image: fullImageUrl },
       }),
     });
 
@@ -58,10 +48,8 @@ app.post("/api/ghibli-style", async (req, res) => {
     if (response.status !== 201) {
       return res.status(response.status).json({ error: data.detail || "Prediction failed" });
     }
-
     res.json(data);
   } catch (error) {
-    console.error("API error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -72,10 +60,7 @@ app.post("/delete-uploaded", (req, res) => {
 
   const filePath = path.join(uploadFolder, filename);
   fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error("Failed to delete uploaded image:", err);
-      return res.status(500).json({ error: "Failed to delete file" });
-    }
+    if (err) return res.status(500).json({ error: "Failed to delete file" });
     res.json({ message: "File deleted successfully" });
   });
 });
