@@ -1,122 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ghibli Style AI Upload</title>
-<style>
-  body { font-family: Arial, sans-serif; text-align:center; margin: 2rem; }
-  img { max-width: 300px; border: 1px solid #ccc; margin: 1rem 0; }
-  button { font-size: 1rem; padding: 0.5rem 1rem; margin: 0.3rem; }
-  input[type="file"] { margin: 1rem 0; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ghibli Style Converter</title>
 </head>
 <body>
-<h1>Ghibli Style AI Image Upload</h1>
-
-<input type="file" id="uploadInput" accept="image/*" />
-<br/>
-<img id="image" src="https://i.imgur.com/W7Lr5kN.jpg" alt="Uploaded or original image" />
-<br/>
-<button id="styleBtn" disabled>Convert to Ghibli Style</button>
-<button id="saveBtn" disabled>Save Image</button>
-
-<script>
-const uploadInput = document.getElementById("uploadInput");
-const image = document.getElementById("image");
-const styleBtn = document.getElementById("styleBtn");
-const saveBtn = document.getElementById("saveBtn");
-
-let uploadedFilename = null; // track uploaded file for deletion
-let stylizedImageUrl = null;
-
-uploadInput.addEventListener("change", async () => {
-  const file = uploadInput.files[0];
-  if (!file) return;
-
-  styleBtn.disabled = true;
-  saveBtn.disabled = true;
-
-  // Upload image to server
-  const formData = new FormData();
-  formData.append("image", file);
-
-  try {
-    const res = await fetch("/upload", { method: "POST", body: formData });
-    const data = await res.json();
-    if (res.ok) {
-      image.src = data.imageUrl;
-      // Extract filename from URL for deletion later
-      uploadedFilename = data.imageUrl.split("/").pop();
-      styleBtn.disabled = false;
-      saveBtn.disabled = true;
-      stylizedImageUrl = null;
-    } else {
-      alert(data.error || "Upload failed");
-    }
-  } catch (err) {
-    alert("Upload error: " + err.message);
-  }
-});
-
-styleBtn.addEventListener("click", async () => {
-  if (!image.src) return;
-
-  styleBtn.disabled = true;
-  saveBtn.disabled = true;
-  styleBtn.textContent = "Processing...";
-
-  try {
-    const res = await fetch("/api/ghibli-style", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image_url: image.src }),
-    });
-    const data = await res.json();
-    if (data.output && data.output[0]) {
-      stylizedImageUrl = data.output[0];
-      image.src = stylizedImageUrl;
-      saveBtn.disabled = false;
-    } else {
-      alert("Failed to get stylized image");
-    }
-  } catch (err) {
-    alert("Error: " + err.message);
-  } finally {
-    styleBtn.disabled = false;
-    styleBtn.textContent = "Convert to Ghibli Style";
-  }
-});
-
-saveBtn.addEventListener("click", () => {
-  if (!stylizedImageUrl) return;
-
-  // Download the stylized image
-  const link = document.createElement("a");
-  link.href = stylizedImageUrl;
-  link.download = "ghibli-style.png";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  // After save, delete uploaded image from server
-  if (uploadedFilename) {
-    fetch("/delete-uploaded", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: uploadedFilename }),
-    }).then(() => {
-      uploadedFilename = null;
-      saveBtn.disabled = true;
-      styleBtn.disabled = true;
-      image.src = "https://i.imgur.com/W7Lr5kN.jpg"; // Reset to original image
-      uploadInput.value = ""; // reset file input
-      stylizedImageUrl = null;
-    }).catch(err => {
-      console.error("Failed to delete uploaded file:", err);
-    });
-  }
-});
-</script>
+  <h1>Upload an image to convert to Ghibli Style</h1>
+  <input type="file" id="imageInput" />
+  <button id="uploadBtn">Upload & Convert</button>
+  <button id="saveBtn" style="display:none;">Save Image</button>
+  <div id="result"></div>
+  <script src="main.js"></script>
 </body>
 </html>
