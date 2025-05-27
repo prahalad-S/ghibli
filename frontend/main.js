@@ -1,40 +1,40 @@
-document.getElementById("uploadBtn").onclick = async () => {
-  const fileInput = document.getElementById("imageInput");
-  if (!fileInput.files[0]) return alert("Please select an image.");
-  const formData = new FormData();
-  formData.append("image", fileInput.files[0]);
+const BACKEND_URL = "https://ghibli-fxgy.onrender.com";
 
-  const uploadRes = await fetch("/upload", {
+async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${BACKEND_URL}/upload`, {
     method: "POST",
     body: formData
   });
 
-  const { imageUrl } = await uploadRes.json();
-  const res = await fetch("/api/ghibli-style", {
+  const data = await res.json();
+  return data.imageUrl; // returns /uploads/filename.jpg
+}
+
+async function stylizeImage(imageUrl) {
+  const res = await fetch(`${BACKEND_URL}/api/ghibli-style`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ image_url: imageUrl })
   });
 
   const data = await res.json();
-  if (data && data.output) {
-    const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = `<img src="${data.output[0]}" width="300"/><br/>`;
-    document.getElementById("saveBtn").style.display = "inline";
-    document.getElementById("saveBtn").onclick = () => {
-      const a = document.createElement("a");
-      a.href = data.output[0];
-      a.download = "ghibli-style.png";
-      a.click();
+  return data;
+}
 
-      // Delete the uploaded file
-      fetch("/delete-uploaded", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: imageUrl.split("/").pop() })
-      });
-    };
-  } else {
-    alert("Failed to get stylized image");
-  }
-};
+async function deleteUploaded(filename) {
+  const res = await fetch(`${BACKEND_URL}/delete-uploaded`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ filename })
+  });
+
+  const data = await res.json();
+  return data;
+}
