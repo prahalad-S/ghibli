@@ -33,11 +33,11 @@
       img.src = imageUrl;
       loading.classList.remove("hidden");
 
-      const response = await fetch("http://localhost:3000/api/ghibli-style", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_url: imageUrl })
-      });
+     const response = await fetch("https://ghibli-fxgy.onrender.com/api/ghibli-style", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ image_url: imageUrl })
+});
 
       const data = await response.json();
       loading.classList.add("hidden");
