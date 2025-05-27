@@ -2,17 +2,12 @@ services:
   - type: web
     name: ghibli-backend
     env: node
-    plan: free
     buildCommand: "npm install"
     startCommand: "npm start"
     envVars:
-    - key: REPLICATE_API_TOKEN
-  sync: false
-
+      - key: REPLICATE_API_TOKEN
+        value: r8_4DpI4QbrPS2f1UkOpBTWS81OW2DlhC84DMTky
 
 staticSites:
   - name: ghibli-frontend
-    buildCommand: ""
     staticPublishPath: frontend
-    indexDocument: index.html
-    errorDocument: index.html
