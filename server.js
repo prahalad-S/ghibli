@@ -1,47 +1,54 @@
 const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
+const path = require("path");
+const fetch = require("node-fetch"); // Make sure to have node-fetch installed
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
+
+// Serve frontend static files from the 'frontend' folder
+app.use(express.static(path.join(__dirname, "frontend")));
+
 app.use(express.json());
 
-const REPLICATE_API_TOKEN = "YOUR_REPLICATE_API_TOKEN";
-const MODEL_VERSION = "cjwbw/anything-to-ghibli:da4b8d778b8e82c3ab671b8e3fd4fda7dbf568c2e2c22ecf6d29145f1d173c45";
-
+// Your API endpoint for Ghibli style transformation
 app.post("/api/ghibli-style", async (req, res) => {
-  const { image_url } = req.body;
+  try {
+    const { image_url } = req.body;
+    if (!image_url) {
+      return res.status(400).json({ error: "Image URL is required" });
+    }
 
-  const prediction = await fetch("https://api.replicate.com/v1/predictions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Token ${REPLICATE_API_TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      version: MODEL_VERSION,
-      input: { image: image_url }
-    })
-  }).then(res => res.json());
-
-  let output = null;
-  while (!prediction.output && prediction.status !== "failed") {
-    await new Promise(r => setTimeout(r, 2000));
-    const statusRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-      headers: { "Authorization": `Token ${REPLICATE_API_TOKEN}` }
+    const response = await fetch("https://api.replicate.com/v1/predictions", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        version: "db21e45d3d8662f2bf2ad4f2e24dbb0e44e90207a55ed9b058bb69e2c9ab0e55",
+        input: { image: image_url },
+      }),
     });
-    const statusJson = await statusRes.json();
-    prediction.output = statusJson.output;
-    prediction.status = statusJson.status;
-  }
 
-  if (prediction.output) {
-    res.json({ output_url: prediction.output[0] });
-  } else {
-    res.status(500).json({ error: "Style transfer failed." });
+    const data = await response.json();
+
+    if (response.status !== 201) {
+      return res.status(response.status).json({ error: data.detail || "Prediction failed" });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("API error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
+// For all other routes, serve the frontend's index.html (supports client-side routing)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend", "index.html"));
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
