@@ -1,16 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ghibli Style Converter</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    img { max-width: 300px; margin: 10px; display: block; }
+    #output { margin-top: 20px; }
+    button { margin: 10px; padding: 10px 20px; }
+  </style>
 </head>
 <body>
-  <h1>Upload an image to convert to Ghibli Style</h1>
-  <input type="file" id="imageInput" />
-  <button id="uploadBtn">Upload & Convert</button>
-  <button id="saveBtn" style="display:none;">Save Image</button>
-  <div id="result"></div>
+  <h1>Upload an Image to Convert Ghibli Style</h1>
+  <input type="file" id="uploadInput" />
+  <img id="preview" src="" alt="Image preview" style="display:none;" />
+  <div>
+    <button id="convertBtn" disabled>Convert to Ghibli Style</button>
+    <button id="saveBtn" style="display:none;">Save</button>
+  </div>
+  <div id="output">
+    <h2>Stylized Output</h2>
+    <img id="stylized" src="" alt="Stylized image" style="display:none;" />
+  </div>
+
   <script src="main.js"></script>
 </body>
 </html>
