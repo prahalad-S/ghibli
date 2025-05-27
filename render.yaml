@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ghibli-backend
+    env: node
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: REPLICATE_API_TOKEN
+        value: YOUR_REPLICATE_API_TOKEN
+
+staticSites:
+  - name: ghibli-frontend
+    buildCommand: ""
+    staticPublishPath: frontend
