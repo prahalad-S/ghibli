@@ -38,6 +38,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
 // Serve uploaded images statically
 app.use("/uploads", express.static(uploadFolder));
 
+
 // Ghibli style API call: expects JSON with { image_url: "..."}
 app.post("/api/ghibli-style", async (req, res) => {
   try {
@@ -53,15 +54,18 @@ app.post("/api/ghibli-style", async (req, res) => {
       fullImageUrl = `${protocol}://${host}${image_url}`;
     }
 
-  const response = await fetch("https://api.replicate.com/v1/predictions", {
+const response = await fetch("https://api.replicate.com/v1/predictions", {
   method: "POST",
   headers: {
     Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    version: "db21e45d3d8662f2bf2ad4f2e24dbb0e44e90207a55ed9b058bb69e2c9ab0e55",
-    input: { image: fullImageUrl },
+    version: "7be575a9c8b24e419a6e6d3303c189532653b6a61c7d7b7a87edb5d80000a14e",
+    input: {
+      image: fullImageUrl,
+      prompt: "ghibli style"
+    },
   }),
 });
 
