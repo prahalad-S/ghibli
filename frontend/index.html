@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ghibli Style Image Converter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ghibli Style AI</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align:center; margin: 2rem; }
+  img { max-width: 300px; border: 1px solid #ccc; margin: 1rem 0; }
+  button { font-size: 1rem; padding: 0.5rem 1rem; }
+</style>
 </head>
-<body class="bg-gradient-to-r from-blue-100 to-purple-200 min-h-screen flex flex-col items-center justify-center p-6">
+<body>
+<h1>Ghibli Style AI Image</h1>
+<img id="image" src="https://i.imgur.com/W7Lr5kN.jpg" alt="Original" />
+<br/>
+<button id="styleBtn">Convert to Ghibli Style</button>
 
-  <h1 class="text-3xl font-bold mb-6">🎨 Ghibli Style Converter</h1>
+<script>
+const image = document.getElementById("image");
+const button = document.getElementById("styleBtn");
 
-  <div class="flex flex-col items-center space-y-4">
-    <input id="imageURL" class="p-2 rounded border w-80" type="text" placeholder="Paste image URL..." />
+button.onclick = async () => {
+  button.disabled = true;
+  button.textContent = "Processing...";
+  const imageUrl = image.src;
 
-    <img id="myImage" class="rounded shadow-lg w-80 h-auto border-2 border-white" src="https://placekitten.com/400/300" alt="Input Image" />
-
-    <button id="ghibliButton" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-      Convert to Ghibli Style
-    </button>
-
-    <div id="loading" class="text-sm text-gray-600 hidden">Processing... This may take 10–20 seconds.</div>
-  </div>
-
-  <script>
-    const button = document.getElementById("ghibliButton");
-    const img = document.getElementById("myImage");
-    const urlInput = document.getElementById("imageURL");
-    const loading = document.getElementById("loading");
-
-    button.addEventListener("click", async () => {
-      const imageUrl = urlInput.value || img.src;
-      img.src = imageUrl;
-      loading.classList.remove("hidden");
-
-     const response = await fetch("https://ghibli-fxgy.onrender.com/api/ghibli-style", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ image_url: imageUrl })
-});
-
-      const data = await response.json();
-      loading.classList.add("hidden");
-
-      if (data.output_url) {
-        img.src = data.output_url;
-      } else {
-        alert("Failed to convert image.");
-      }
+  try {
+    const response = await fetch("/api/ghibli-style", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image_url: imageUrl }),
     });
-  </script>
-
+    const data = await response.json();
+    if (data.output) {
+      image.src = data.output[0];
+    } else {
+      alert("Failed to get stylized image.");
+    }
+  } catch (error) {
+    alert("Error: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Convert to Ghibli Style";
+  }
+};
+</script>
 </body>
 </html>
