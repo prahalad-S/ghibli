@@ -1,22 +1,19 @@
 const express = require("express");
 const path = require("path");
-const fetch = require("node-fetch"); // Make sure to have node-fetch installed
 require("dotenv").config();
+
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 
-// Serve frontend static files from the 'frontend' folder
 app.use(express.static(path.join(__dirname, "frontend")));
 
 app.use(express.json());
 
-// Your API endpoint for Ghibli style transformation
 app.post("/api/ghibli-style", async (req, res) => {
   try {
     const { image_url } = req.body;
-    if (!image_url) {
-      return res.status(400).json({ error: "Image URL is required" });
-    }
+    if (!image_url) return res.status(400).json({ error: "Image URL is required" });
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
@@ -43,7 +40,6 @@ app.post("/api/ghibli-style", async (req, res) => {
   }
 });
 
-// For all other routes, serve the frontend's index.html (supports client-side routing)
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "index.html"));
 });
