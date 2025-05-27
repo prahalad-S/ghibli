@@ -6,8 +6,9 @@ services:
     buildCommand: "npm install"
     startCommand: "npm start"
     envVars:
-      - key: REPLICATE_API_TOKEN
-        value: r8_eORKAQ7BYJEetT6LJ5xA3jlr1DSJ3j51kQhxD  # Replace with your actual token
+    - key: REPLICATE_API_TOKEN
+  sync: false
+
 
 staticSites:
   - name: ghibli-frontend
