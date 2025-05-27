@@ -53,19 +53,20 @@ app.post("/api/ghibli-style", async (req, res) => {
       fullImageUrl = `${protocol}://${host}${image_url}`;
     }
 
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version: "db21e45d3d8662f2bf2ad4f2e24dbb0e44e90207a55ed9b058bb69e2c9ab0e55",
-        input: { image: fullImageUrl },
-      }),
-    });
+  const response = await fetch("https://api.replicate.com/v1/predictions", {
+  method: "POST",
+  headers: {
+    Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    version: "db21e45d3d8662f2bf2ad4f2e24dbb0e44e90207a55ed9b058bb69e2c9ab0e55",
+    input: { image: fullImageUrl },
+  }),
+});
 
-    const data = await response.json();
+const data = await response.json();
+console.log("Replicate response:", data); // <--- Add this
 
     if (response.status !== 201) {
       return res.status(response.status).json({ error: data.detail || "Prediction failed" });
