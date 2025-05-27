@@ -2,13 +2,16 @@ services:
   - type: web
     name: ghibli-backend
     env: node
+    plan: free
     buildCommand: "npm install"
     startCommand: "npm start"
     envVars:
       - key: REPLICATE_API_TOKEN
-        value: YOUR_REPLICATE_API_TOKEN
+        value: YOUR_REPLICATE_API_TOKEN  # Replace this with your actual token
 
 staticSites:
   - name: ghibli-frontend
-    buildCommand: ""
+    buildCommand: ""  # No build needed for plain HTML
     staticPublishPath: frontend
+    indexDocument: index.html
+    errorDocument: index.html
