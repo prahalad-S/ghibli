@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ghibli Style Image Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-purple-200 min-h-screen flex flex-col items-center justify-center p-6">
+
+  <h1 class="text-3xl font-bold mb-6">🎨 Ghibli Style Converter</h1>
+
+  <div class="flex flex-col items-center space-y-4">
+    <input id="imageURL" class="p-2 rounded border w-80" type="text" placeholder="Paste image URL..." />
+
+    <img id="myImage" class="rounded shadow-lg w-80 h-auto border-2 border-white" src="https://placekitten.com/400/300" alt="Input Image" />
+
+    <button id="ghibliButton" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+      Convert to Ghibli Style
+    </button>
+
+    <div id="loading" class="text-sm text-gray-600 hidden">Processing... This may take 10–20 seconds.</div>
+  </div>
+
+  <script>
+    const button = document.getElementById("ghibliButton");
+    const img = document.getElementById("myImage");
+    const urlInput = document.getElementById("imageURL");
+    const loading = document.getElementById("loading");
+
+    button.addEventListener("click", async () => {
+      const imageUrl = urlInput.value || img.src;
+      img.src = imageUrl;
+      loading.classList.remove("hidden");
+
+      const response = await fetch("http://localhost:3000/api/ghibli-style", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_url: imageUrl })
+      });
+
+      const data = await response.json();
+      loading.classList.add("hidden");
+
+      if (data.output_url) {
+        img.src = data.output_url;
+      } else {
+        alert("Failed to convert image.");
+      }
+    });
+  </script>
+
+</body>
+</html>
